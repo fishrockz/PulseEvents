@@ -35,11 +35,11 @@ struct ftm_channel_struct {
 	uint32_t cv;
 };
 
-class PulsePositionOutput
+class PulseEventOutput
 {
 public:
-	PulsePositionOutput(void);
-	PulsePositionOutput(int polarity);
+	PulseEventOutput(void);
+	PulseEventOutput(int polarity);
 	bool begin(uint8_t txPin); // txPin can be 5,6,9,10,20,21,22,23
 	bool begin(uint8_t txPin, uint8_t framePin);
 	bool write(uint8_t channel, float microseconds);
@@ -58,20 +58,24 @@ private:
 	uint8_t total_channels_buffer;
 	uint8_t cscSet;
 	uint8_t cscClear;
-	static PulsePositionOutput *list[8];
+	static PulseEventOutput *list[8];
 	static uint8_t channelmask;
 };
 
 
-class PulsePositionInput
+class PulseEventInput
 {
 public:
-	PulsePositionInput(void);
-	PulsePositionInput(int polarity);
-	bool begin(uint8_t rxPin); // rxPin can be 5,6,9,10,20,21,22,23
+	PulseEventInput(void);
+	PulseEventInput(int polarity);
+//	bool begin(uint8_t rxPin); // rxPin can be 5,6,9,10,20,21,22,23
+	bool begin(uint8_t pin, void (*userFunction)());
 	int available(void);
 	float read(uint8_t channel);
 	friend void ftm0_isr(void);
+	
+	static void (*isrCallback)();
+	static void isrDefaultUnused();
 private:
 	void isr(void);
 	struct ftm_channel_struct *ftm;
@@ -84,7 +88,7 @@ private:
 	bool available_flag;
 	static bool overflow_inc;
 	static uint16_t overflow_count;
-	static PulsePositionInput *list[8];
+	static PulseEventInput *list[8];
 	static uint8_t channelmask;
 };
 

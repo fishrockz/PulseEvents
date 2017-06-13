@@ -1,6 +1,6 @@
 {
-  "name": "PulsePosition",
-  "keywords": "pulse, signal",
+  "name": "PulseEvent",
+  "keywords": "pulse, signal, Event",
   "description": "Multiple High-Res Input & Output PPM Encoded Signal Streams",
   "authors":
   [

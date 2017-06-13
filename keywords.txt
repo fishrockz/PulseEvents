@@ -1,3 +1,3 @@
-PulsePositionOutput	KEYWORD2
-PulsePositionInput	KEYWORD2
-PulsePosition	KEYWORD2
+PulseEventOutput	KEYWORD2
+PulseEventInput	KEYWORD2
+PulseEvent	KEYWORD2

@@ -28,7 +28,7 @@
 
 
 
-#include "PulsePosition.h"
+#include "PulseEvent.h"
 
 
 // Timing parameters, in microseconds.
@@ -101,10 +101,13 @@
 #define FRAME_PIN_CLEAR()            *(framePinReg + 8) = framePinMask
 #endif
 
-uint8_t PulsePositionOutput::channelmask = 0;
-PulsePositionOutput * PulsePositionOutput::list[8];
 
-PulsePositionOutput::PulsePositionOutput(void)
+
+void (*PulseEventInput::isrCallback)() = PulseEventInput::isrDefaultUnused;
+uint8_t PulseEventOutput::channelmask = 0;
+PulseEventOutput * PulseEventOutput::list[8];
+
+PulseEventOutput::PulseEventOutput(void)
 {
 	pulse_width[0] = TX_MINIMUM_FRAME_CLOCKS;
 	for (int i=1; i <= PULSEPOSITION_MAXCHANNELS; i++) {
@@ -114,7 +117,7 @@ PulsePositionOutput::PulsePositionOutput(void)
 	cscClear = 0b01011000;
 }
 
-PulsePositionOutput::PulsePositionOutput(int polarity)
+PulseEventOutput::PulseEventOutput(int polarity)
 {
 	pulse_width[0] = TX_MINIMUM_FRAME_CLOCKS;
 	for (int i=1; i <= PULSEPOSITION_MAXCHANNELS; i++) {
@@ -129,12 +132,12 @@ PulsePositionOutput::PulsePositionOutput(int polarity)
 	}
 }
 
-bool PulsePositionOutput::begin(uint8_t txPin)
+bool PulseEventOutput::begin(uint8_t txPin)
 {
 	return begin(txPin, 255);
 }
 
-bool PulsePositionOutput::begin(uint8_t txPin, uint8_t framePin)
+bool PulseEventOutput::begin(uint8_t txPin, uint8_t framePin)
 {
 	uint32_t channel;
 	volatile void *reg;
@@ -184,7 +187,7 @@ bool PulsePositionOutput::begin(uint8_t txPin, uint8_t framePin)
 	return true;
 }
 
-bool PulsePositionOutput::write(uint8_t channel, float microseconds)
+bool PulseEventOutput::write(uint8_t channel, float microseconds)
 {
 	uint32_t i, sum, space, clocks, num_channels;
 
@@ -213,7 +216,7 @@ bool PulsePositionOutput::write(uint8_t channel, float microseconds)
 	return true;
 }
 
-void PulsePositionOutput::isr(void)
+void PulseEventOutput::isr(void)
 {
 	#if defined(KINETISK)
 	FTM0_MODE = 0;
@@ -271,55 +274,55 @@ void ftm0_isr(void)
 		#elif defined(KINETISL)
 		FTM0_SC = FTM0_SC_VALUE | FTM_SC_TOF;
 		#endif
-		PulsePositionInput::overflow_count++;
-		PulsePositionInput::overflow_inc = true;
+		PulseEventInput::overflow_count++;
+		PulseEventInput::overflow_inc = true;
 	}
 	// TODO: this could be efficient by reading FTM0_STATUS
-	uint8_t maskin = PulsePositionInput::channelmask;
-	if ((maskin & 0x01) && (FTM0_C0SC & 0x80)) PulsePositionInput::list[0]->isr();
-	if ((maskin & 0x02) && (FTM0_C1SC & 0x80)) PulsePositionInput::list[1]->isr();
-	if ((maskin & 0x04) && (FTM0_C2SC & 0x80)) PulsePositionInput::list[2]->isr();
-	if ((maskin & 0x08) && (FTM0_C3SC & 0x80)) PulsePositionInput::list[3]->isr();
-	if ((maskin & 0x10) && (FTM0_C4SC & 0x80)) PulsePositionInput::list[4]->isr();
-	if ((maskin & 0x20) && (FTM0_C5SC & 0x80)) PulsePositionInput::list[5]->isr();
+	uint8_t maskin = PulseEventInput::channelmask;
+	if ((maskin & 0x01) && (FTM0_C0SC & 0x80)) PulseEventInput::list[0]->isr();
+	if ((maskin & 0x02) && (FTM0_C1SC & 0x80)) PulseEventInput::list[1]->isr();
+	if ((maskin & 0x04) && (FTM0_C2SC & 0x80)) PulseEventInput::list[2]->isr();
+	if ((maskin & 0x08) && (FTM0_C3SC & 0x80)) PulseEventInput::list[3]->isr();
+	if ((maskin & 0x10) && (FTM0_C4SC & 0x80)) PulseEventInput::list[4]->isr();
+	if ((maskin & 0x20) && (FTM0_C5SC & 0x80)) PulseEventInput::list[5]->isr();
 	#if defined(KINETISK)
-	if ((maskin & 0x40) && (FTM0_C6SC & 0x80)) PulsePositionInput::list[6]->isr();
-	if ((maskin & 0x80) && (FTM0_C7SC & 0x80)) PulsePositionInput::list[7]->isr();
+	if ((maskin & 0x40) && (FTM0_C6SC & 0x80)) PulseEventInput::list[6]->isr();
+	if ((maskin & 0x80) && (FTM0_C7SC & 0x80)) PulseEventInput::list[7]->isr();
 	#endif
-	uint8_t maskout = PulsePositionOutput::channelmask;
-	if ((maskout & 0x01) && (FTM0_C0SC & 0x80)) PulsePositionOutput::list[0]->isr();
-	if ((maskout & 0x02) && (FTM0_C1SC & 0x80)) PulsePositionOutput::list[1]->isr();
-	if ((maskout & 0x04) && (FTM0_C2SC & 0x80)) PulsePositionOutput::list[2]->isr();
-	if ((maskout & 0x08) && (FTM0_C3SC & 0x80)) PulsePositionOutput::list[3]->isr();
-	if ((maskout & 0x10) && (FTM0_C4SC & 0x80)) PulsePositionOutput::list[4]->isr();
-	if ((maskout & 0x20) && (FTM0_C5SC & 0x80)) PulsePositionOutput::list[5]->isr();
+	uint8_t maskout = PulseEventOutput::channelmask;
+	if ((maskout & 0x01) && (FTM0_C0SC & 0x80)) PulseEventOutput::list[0]->isr();
+	if ((maskout & 0x02) && (FTM0_C1SC & 0x80)) PulseEventOutput::list[1]->isr();
+	if ((maskout & 0x04) && (FTM0_C2SC & 0x80)) PulseEventOutput::list[2]->isr();
+	if ((maskout & 0x08) && (FTM0_C3SC & 0x80)) PulseEventOutput::list[3]->isr();
+	if ((maskout & 0x10) && (FTM0_C4SC & 0x80)) PulseEventOutput::list[4]->isr();
+	if ((maskout & 0x20) && (FTM0_C5SC & 0x80)) PulseEventOutput::list[5]->isr();
 	#if defined(KINETISK)
-	if ((maskout & 0x40) && (FTM0_C6SC & 0x80)) PulsePositionOutput::list[6]->isr();
-	if ((maskout & 0x80) && (FTM0_C7SC & 0x80)) PulsePositionOutput::list[7]->isr();
+	if ((maskout & 0x40) && (FTM0_C6SC & 0x80)) PulseEventOutput::list[6]->isr();
+	if ((maskout & 0x80) && (FTM0_C7SC & 0x80)) PulseEventOutput::list[7]->isr();
 	#endif
-	PulsePositionInput::overflow_inc = false;
+	PulseEventInput::overflow_inc = false;
 }
 
 // some explanation regarding this C to C++ trickery can be found here:
 // http://forum.pjrc.com/threads/25278-Low-Power-with-Event-based-software-architecture-brainstorm?p=43496&viewfull=1#post43496
 
-uint16_t PulsePositionInput::overflow_count = 0;
-bool PulsePositionInput::overflow_inc = false;
-uint8_t PulsePositionInput::channelmask = 0;
-PulsePositionInput * PulsePositionInput::list[8];
+uint16_t PulseEventInput::overflow_count = 0;
+bool PulseEventInput::overflow_inc = false;
+uint8_t PulseEventInput::channelmask = 0;
+PulseEventInput * PulseEventInput::list[8];
 
-PulsePositionInput::PulsePositionInput(void)
+PulseEventInput::PulseEventInput(void)
 {
 	cscEdge = 0b01000100;
 }
 
-PulsePositionInput::PulsePositionInput(int polarity)
+PulseEventInput::PulseEventInput(int polarity)
 {
 	cscEdge = (polarity == FALLING) ? 0b01001000 : 0b01000100;
 }
 
 
-bool PulsePositionInput::begin(uint8_t pin)
+bool PulseEventInput::begin(uint8_t pin, void (*userFunction)())
 {
 	uint32_t channel;
 	volatile void *reg;
@@ -357,10 +360,13 @@ bool PulsePositionInput::begin(uint8_t pin)
 	CSC_CHANGE(ftm, cscEdge); // input capture & interrupt on rising edge
 	NVIC_SET_PRIORITY(IRQ_FTM0, 32);
 	NVIC_ENABLE_IRQ(IRQ_FTM0);
+	
+	isrCallback=userFunction;
+	
 	return true;
 }
 
-void PulsePositionInput::isr(void)
+void PulseEventInput::isr(void)
 {
 	uint32_t val, count;
 
@@ -381,6 +387,9 @@ void PulsePositionInput::isr(void)
 			}
 			total_channels = write_index;
 			available_flag = true;
+			
+			// at this point a userdefined function should also be called
+			isrCallback();
 		}
 		write_index = 0;
 	} else {
@@ -390,7 +399,7 @@ void PulsePositionInput::isr(void)
 	}
 }
 
-int PulsePositionInput::available(void)
+int PulseEventInput::available(void)
 {
 	uint32_t total;
 	bool flag;
@@ -403,7 +412,7 @@ int PulsePositionInput::available(void)
 	return -1;
 }
 
-float PulsePositionInput::read(uint8_t channel)
+float PulseEventInput::read(uint8_t channel)
 {
 	uint32_t total, index, value=0;
 
@@ -416,6 +425,11 @@ float PulsePositionInput::read(uint8_t channel)
 	__enable_irq();
 	return (float)value / (float)CLOCKS_PER_MICROSECOND;
 }
+
+void PulseEventInput::isrDefaultUnused()
+{
+}
+
 
 
 
