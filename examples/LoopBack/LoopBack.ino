@@ -9,7 +9,7 @@ int count=0;
 void EventFunction(EventBaseObject ThisFunctionsInfo){
 
   int i, num;
-
+	Serial.print("EventFunction: ");
   // Every time new data arrives, simply print it
   // to the Arduino Serial Monitor.
   num = myIn.available();
@@ -31,7 +31,7 @@ void EventFunction(EventBaseObject ThisFunctionsInfo){
 
 }
 
-void setup() {
+void setup() {while(!Serial){};delay(200);Serial.println("setting off A");
   myOut.begin(9);  // connect pins 9 and 10 together...
   myIn.begin(10,EventFunction);
   myOut.write(1, 600.03);
@@ -39,10 +39,12 @@ void setup() {
   myOut.write(3, 759.24);
   // slots 4 and 5 will default to 1500 us
   myOut.write(6, 1234.56);
+  
+  Serial.println("setting off B");
 }
 
 
 
 void loop() {
-
+//Serial.println("going");
 }

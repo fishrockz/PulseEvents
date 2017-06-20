@@ -405,6 +405,7 @@ void PulseEventInput::isr(void)
 			// at this point a userdefined function should also be called
 			EventBaseObject ThisEventsInfo;
 			// add some info to ThisEventsInfo
+			Serial.println("send trig");
 			WsSEventManger.trigger(ThisEventsInfo,isrCallback);
 
 		}
