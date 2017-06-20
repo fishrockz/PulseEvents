@@ -109,12 +109,12 @@
 
 
 
-EventObjectScheduler MyEventManger;
+EventObjectScheduler WsSEventManger;
 
 #endif
 */
-EventObjectScheduler MyEventManger;
-
+//EventObjectScheduler WsSEventManger;
+extern EventObjectScheduler WsSEventManger;
 
 
 void (*PulseEventInput::isrCallback)(EventBaseObject) = PulseEventInput::isrDefaultUnused;
@@ -405,7 +405,7 @@ void PulseEventInput::isr(void)
 			// at this point a userdefined function should also be called
 			EventBaseObject ThisEventsInfo;
 			// add some info to ThisEventsInfo
-			MyEventManger.trigger(ThisEventsInfo,isrCallback);
+			WsSEventManger.trigger(ThisEventsInfo,isrCallback);
 
 		}
 		write_index = 0;
