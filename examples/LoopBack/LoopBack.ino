@@ -27,7 +27,7 @@ void EventFunction(EventBaseObject ThisFunctionsInfo){
   }else{
   Serial.println("num==0");
   }
-
+	delay(5);
 
 }
 
