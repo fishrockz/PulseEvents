@@ -29,7 +29,7 @@
 
 
 #include "PulseEvent.h"
-
+//#include "EventObjects.h"
 
 // Timing parameters, in microseconds.
 
@@ -103,7 +103,7 @@
 
 
 
-
+/*
 #ifndef EventManger
 #define EventManger
 
@@ -112,8 +112,8 @@
 EventObjectScheduler MyEventManger;
 
 #endif
-
-
+*/
+EventObjectScheduler MyEventManger;
 
 
 

@@ -1,5 +1,5 @@
 #include <PulseEvent.h>
-//#include <EventObjects.h>
+//#include "EventObjects.h"
 // Simple loopback test: create 1 output to transmit
 // test pulses, and 1 input to receive the pulses
 PulseEventOutput myOut;
