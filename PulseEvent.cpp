@@ -103,7 +103,21 @@
 
 
 
-void (*PulseEventInput::isrCallback)() = PulseEventInput::isrDefaultUnused;
+
+#ifndef EventManger
+#define EventManger
+
+
+
+EventObjectScheduler MyEventManger;
+
+#endif
+
+
+
+
+
+void (*PulseEventInput::isrCallback)(EventBaseObject) = PulseEventInput::isrDefaultUnused;
 uint8_t PulseEventOutput::channelmask = 0;
 PulseEventOutput * PulseEventOutput::list[8];
 
@@ -322,7 +336,7 @@ PulseEventInput::PulseEventInput(int polarity)
 }
 
 
-bool PulseEventInput::begin(uint8_t pin, void (*userFunction)())
+bool PulseEventInput::begin(uint8_t pin, voidFunctionWithEventBaseObjectParameter useFunc)
 {
 	uint32_t channel;
 	volatile void *reg;
@@ -361,7 +375,7 @@ bool PulseEventInput::begin(uint8_t pin, void (*userFunction)())
 	NVIC_SET_PRIORITY(IRQ_FTM0, 32);
 	NVIC_ENABLE_IRQ(IRQ_FTM0);
 	
-	isrCallback=userFunction;
+	isrCallback=useFunc;
 	
 	return true;
 }
@@ -389,7 +403,10 @@ void PulseEventInput::isr(void)
 			available_flag = true;
 			
 			// at this point a userdefined function should also be called
-			isrCallback();
+			EventBaseObject ThisEventsInfo;
+			// add some info to ThisEventsInfo
+			MyEventManger.trigger(ThisEventsInfo,isrCallback);
+
 		}
 		write_index = 0;
 	} else {
@@ -426,8 +443,11 @@ float PulseEventInput::read(uint8_t channel)
 	return (float)value / (float)CLOCKS_PER_MICROSECOND;
 }
 
-void PulseEventInput::isrDefaultUnused()
+void PulseEventInput::isrDefaultUnused(EventBaseObject ThisEventsNewObject)
 {
+
+
+
 }
 
 

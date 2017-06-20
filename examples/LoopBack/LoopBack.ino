@@ -1,12 +1,12 @@
 #include <PulseEvent.h>
-
+//#include <EventObjects.h>
 // Simple loopback test: create 1 output to transmit
 // test pulses, and 1 input to receive the pulses
 PulseEventOutput myOut;
 PulseEventInput myIn;
 
 int count=0;
-void EventFunction(){
+void EventFunction(EventBaseObject ThisFunctionsInfo){
 
   int i, num;
 

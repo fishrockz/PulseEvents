@@ -27,7 +27,7 @@
  */
 
 #include <Arduino.h>
-
+#include <EventObjects.h>
 #define PULSEPOSITION_MAXCHANNELS 16
 
 struct ftm_channel_struct {
@@ -69,13 +69,13 @@ public:
 	PulseEventInput(void);
 	PulseEventInput(int polarity);
 //	bool begin(uint8_t rxPin); // rxPin can be 5,6,9,10,20,21,22,23
-	bool begin(uint8_t pin, void (*userFunction)());
+	bool begin(uint8_t pin, voidFunctionWithEventBaseObjectParameter useFunc );
 	int available(void);
 	float read(uint8_t channel);
 	friend void ftm0_isr(void);
 	
-	static void (*isrCallback)();
-	static void isrDefaultUnused();
+	static void (*isrCallback)(EventBaseObject);
+	static void isrDefaultUnused(EventBaseObject);
 private:
 	void isr(void);
 	struct ftm_channel_struct *ftm;
