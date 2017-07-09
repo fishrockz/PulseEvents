@@ -30,7 +30,15 @@
 #include <EventObjects.h>
 #define PULSEPOSITION_MAXCHANNELS 16
 
-
+class PulseEventObject: public EventBaseObject
+{
+public:
+	int testvalue(void);
+	int available(void);
+	float read(uint8_t channel);
+	uint32_t pulse_buffer[PULSEPOSITION_MAXCHANNELS];
+	int goodChanles=0;
+};
 
 struct ftm_channel_struct {
 	uint32_t csc;
@@ -76,8 +84,8 @@ public:
 	float read(uint8_t channel);
 	friend void ftm0_isr(void);
 	
-	static void (*isrCallback)(EventBaseObject);
-	static void isrDefaultUnused(EventBaseObject);
+	static void (*isrCallback)(EventBaseObject * );
+	static void isrDefaultUnused(EventBaseObject * );
 private:
 	void isr(void);
 	struct ftm_channel_struct *ftm;
@@ -92,6 +100,7 @@ private:
 	static uint16_t overflow_count;
 	static PulseEventInput *list[8];
 	static uint8_t channelmask;
+	PulseEventObject  ThisObjectsCurrentEventsInfo;
 };
 
 

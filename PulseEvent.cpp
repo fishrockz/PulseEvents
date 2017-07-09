@@ -117,7 +117,7 @@ EventObjectScheduler WsSEventManger;
 extern EventObjectScheduler WsSEventManger;
 
 
-void (*PulseEventInput::isrCallback)(EventBaseObject) = PulseEventInput::isrDefaultUnused;
+void (*PulseEventInput::isrCallback)(EventBaseObject * ) = PulseEventInput::isrDefaultUnused;
 uint8_t PulseEventOutput::channelmask = 0;
 PulseEventOutput * PulseEventOutput::list[8];
 
@@ -380,6 +380,12 @@ bool PulseEventInput::begin(uint8_t pin, voidFunctionWithEventBaseObjectParamete
 	return true;
 }
 
+
+
+/*void translaterFunction(EventBaseObject * ObjectToSend, voidFunctionWithEventBaseObjectParameter FuncToSend)
+{
+	WsSEventManger.trigger( ObjectToSend, FuncToSend );
+}*/
 void PulseEventInput::isr(void)
 {
 	uint32_t val, count;
@@ -403,11 +409,18 @@ void PulseEventInput::isr(void)
 			available_flag = true;
 			
 			// at this point a userdefined function should also be called
-			EventBaseObject ThisEventsInfo;
+			
+			
 			// add some info to ThisEventsInfo
+			for (int i=0; i < write_index; i++) {
+				ThisObjectsCurrentEventsInfo.pulse_buffer[i]=pulse_buffer[i];
+			}
+			ThisObjectsCurrentEventsInfo.goodChanles=total_channels;
+			Serial.println(ThisObjectsCurrentEventsInfo.goodChanles);
 			Serial.println("send trig");
-			WsSEventManger.trigger(ThisEventsInfo,isrCallback);
-
+			//translaterFunction(&ThisEventsInfo, isrCallback);
+			WsSEventManger.trigger( &ThisObjectsCurrentEventsInfo, isrCallback );
+			//Serial.println("post trig");
 		}
 		write_index = 0;
 	} else {
@@ -443,8 +456,34 @@ float PulseEventInput::read(uint8_t channel)
 	__enable_irq();
 	return (float)value / (float)CLOCKS_PER_MICROSECOND;
 }
+int PulseEventObject::testvalue(void){
+	return 99;
+}
 
-void PulseEventInput::isrDefaultUnused(EventBaseObject ThisEventsNewObject)
+int PulseEventObject::available(void)
+{
+	//return 99;
+	return goodChanles;
+}
+float PulseEventObject::read(uint8_t channel)
+{
+	uint32_t total, index, value=0;
+
+	if (channel == 0) return 0.0;
+	index = channel - 1;
+
+	if (index < goodChanles) 
+	{value = pulse_buffer[index];
+	
+	return (float)value / (float)CLOCKS_PER_MICROSECOND;}
+	else{
+		return 0.0;
+	}
+}
+
+
+
+void PulseEventInput::isrDefaultUnused(EventBaseObject *  ThisEventsNewObject)
 {
 
 

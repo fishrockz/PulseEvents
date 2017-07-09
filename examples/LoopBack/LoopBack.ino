@@ -6,20 +6,24 @@ PulseEventOutput myOut;
 PulseEventInput myIn;
 
 int count=0;
-void EventFunction(EventBaseObject ThisFunctionsInfo){
+void EventFunction(EventBaseObject * ThisFunctionsInfoPointer){
+PulseEventObject* ThisFunctionsInfo = static_cast<PulseEventObject*>(ThisFunctionsInfoPointer);
 
-  int i, num;
-	Serial.print("EventFunction: ");
-  // Every time new data arrives, simply print it
-  // to the Arduino Serial Monitor.
-  num = myIn.available();
-  if (num > 0) {
+ 
+	Serial.print("EventFunction, num: ");
+	int  num;
+
+  	num = ThisFunctionsInfo->available();
+
+	Serial.println(num);
+	
+	if (num > 0) {
     count = count + 1;
-    Serial.print("EventFunction: ");
+    Serial.print("EventFunction called: ");
     Serial.print(count);
     Serial.print(" :  ");
-    for (i=1; i <= num; i++) {
-      float val = myIn.read(i);
+    for (int i=1; i <= num; i++) {
+      float val = ThisFunctionsInfo->read(i);
       Serial.print(val);
       Serial.print("  ");
     }
@@ -27,13 +31,13 @@ void EventFunction(EventBaseObject ThisFunctionsInfo){
   }else{
   Serial.println("num==0");
   }
-	delay(5);
-
+	//delay(500);
 }
+
 
 void setup() {while(!Serial){};delay(200);Serial.println("setting off A");
   myOut.begin(9);  // connect pins 9 and 10 together...
-  myIn.begin(10,EventFunction);
+  myIn.begin(10, EventFunction);
   myOut.write(1, 600.03);
   myOut.write(2, 1500);
   myOut.write(3, 759.24);
