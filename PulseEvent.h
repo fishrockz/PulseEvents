@@ -27,7 +27,18 @@
  */
 
 #include <Arduino.h>
+
+#ifndef Included_EventObjects_H
+#define Included_EventObjects_H
+
 #include <EventObjects.h>
+
+#endif // Included_EventObjects_H 
+
+	
+
+
+
 #define PULSEPOSITION_MAXCHANNELS 16
 
 class PulseEventObject: public EventBaseObject

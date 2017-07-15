@@ -416,8 +416,8 @@ void PulseEventInput::isr(void)
 				ThisObjectsCurrentEventsInfo.pulse_buffer[i]=pulse_buffer[i];
 			}
 			ThisObjectsCurrentEventsInfo.goodChanles=total_channels;
-			Serial.println(ThisObjectsCurrentEventsInfo.goodChanles);
-			Serial.println("send trig");
+	//		Serial.println(ThisObjectsCurrentEventsInfo.goodChanles);
+	//		Serial.println("send trig");
 			//translaterFunction(&ThisEventsInfo, isrCallback);
 			WsSEventManger.trigger( &ThisObjectsCurrentEventsInfo, isrCallback );
 			//Serial.println("post trig");
